@@ -11,7 +11,13 @@ const Header = () => {
   return (
     <header className="my-10 flex justify-between gap-5">
       <Link href="/">
-        <Image src="/icons/logo.svg" alt="logo" width={40} height={32}></Image>
+        <Image
+          src="/icons/logo.svg"
+          alt="logo"
+          width={40}
+          height={32}
+          style={{ width: "auto", height: "auto" }}
+        />
       </Link>
 
       <ul className="flex flex-row items-center gap-8">
