@@ -1,17 +1,31 @@
 import * as React from "react";
+import BookCard from "./BookCard";
 
-// interface Props {
-//   title: string;
-//   books: Book[];
-//   containerClassName?: string;
-// }
+interface BookListItem {
+  id: string | number;
+  title: string;
+  genre: string;
+  coverColor: string;
+  coverUrl: string;
+  isLoanedBook?: boolean;
+}
 
-const BookList = () => {
+interface Props {
+  title: string;
+  books: BookListItem[];
+  containerClassName?: string;
+}
+
+const BookList = ({ title, books, containerClassName }: Props) => {
   return (
-    <section className="">
-      <h2 className="font-bebas-neue text-4xl text-light-100">Title</h2>
+    <section className={containerClassName}>
+      <h2 className="font-bebas-neue text-4xl text-light-100">{title}</h2>
 
-      <ul className="book-list"></ul>
+      <ul className="book-list">
+        {books.map((book) => (
+          <BookCard key={book.title} {...book} />
+        ))}
+      </ul>
     </section>
   );
 };
