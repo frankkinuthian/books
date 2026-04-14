@@ -1,19 +1,25 @@
 import * as React from "react";
 import Image from "next/image";
-// import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-//   const session = await auth();
+  const session = await auth();
 
-//   if (session) redirect("/");
+  if (session) redirect("/");
 
   return (
     <main className="auth-container">
       <section className="auth-form">
         <div className="auth-box">
           <div className="flex flex-row gap-3">
-            <Image src="/icons/logo.svg" alt="logo" width={37} height={37} />
+            <Image
+              src="/icons/logo.svg"
+              alt="logo"
+              width={37}
+              height={37}
+              style={{ width: "auto", height: "auto" }}
+            />
             <h1 className="text-2xl font-semibold text-white">BookWise</h1>
           </div>
 
