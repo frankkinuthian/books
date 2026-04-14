@@ -162,7 +162,7 @@ const ImageUpload = ({
         type="file"
         accept={accept}
         onChange={handleFileChange}
-        className="hidden"
+        className="sr-only"
         tabIndex={-1}
       />
 
