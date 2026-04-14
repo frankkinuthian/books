@@ -34,6 +34,12 @@ export const signInWithCredentials = async (
 
     return { success: true };
   } catch (error) {
+    if (
+      error instanceof Error &&
+      "digest" in error &&
+      String((error as any).digest).startsWith("NEXT_REDIRECT")
+    )
+      throw error;
     console.log(error, "Signin error");
     return { success: false, error: "Signin error" };
   }
@@ -68,18 +74,28 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    await workflowClient.trigger({
-      url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
-      body: {
-        email,
-        fullName,
-      },
-    });
+    try {
+      await workflowClient.trigger({
+        url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
+        body: {
+          email,
+          fullName,
+        },
+      });
+    } catch (e) {
+      console.log(e, "Onboarding workflow trigger failed");
+    }
 
     await signInWithCredentials({ email, password });
 
     return { success: true };
   } catch (error) {
+    if (
+      error instanceof Error &&
+      "digest" in error &&
+      String((error as any).digest).startsWith("NEXT_REDIRECT")
+    )
+      throw error;
     console.log(error, "Signup error");
     return { success: false, error: "Signup error" };
   }

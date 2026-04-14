@@ -25,20 +25,17 @@ const authenticator = async () => {
 
     if (!response.ok) {
       const errorText = await response.text();
-
       throw new Error(
         `Request failed with status ${response.status}: ${errorText}`,
       );
     }
 
     const data = await response.json();
-
     const { signature, expire, token } = data;
-
     return { token, expire, signature };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    throw new Error(`Authentication request failed: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Authentication request failed: ${message}`);
   }
 };
 
@@ -61,7 +58,7 @@ const ImageUpload = ({
   onFileChange,
   value,
 }: Props) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<{ filePath: string | null }>({
     filePath: value ?? null,
   });
@@ -79,7 +76,6 @@ const ImageUpload = ({
 
   const onError = (error: unknown) => {
     console.log(error);
-
     toast({
       title: `${type} upload failed`,
       description: `Your ${type} could not be uploaded. Please try again.`,
@@ -89,39 +85,32 @@ const ImageUpload = ({
 
   const onSuccess = (res: UploadResponse) => {
     const nextFilePath = res.filePath ?? null;
-    const uploadLabel = type === "video" ? "Video" : "Image";
-
     setFile({ filePath: nextFilePath });
     onFileChange(nextFilePath ?? "");
 
     toast({
-      title: `${uploadLabel} uploaded successfully`,
+      title: `${type} uploaded successfully`,
       description: `${nextFilePath ?? "File"} uploaded successfully!`,
     });
   };
 
   const onValidate = (file: File) => {
-    if (type === "image") {
-      if (file.size > 20 * 1024 * 1024) {
-        toast({
-          title: "File size too large",
-          description: "Please upload a file that is less than 20MB in size",
-          variant: "destructive",
-        });
-
-        return false;
-      }
-    } else if (type === "video") {
-      if (file.size > 50 * 1024 * 1024) {
-        toast({
-          title: "File size too large",
-          description: "Please upload a file that is less than 50MB in size",
-          variant: "destructive",
-        });
-        return false;
-      }
+    if (type === "image" && file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File size too large",
+        description: "Please upload a file that is less than 20MB in size",
+        variant: "destructive",
+      });
+      return false;
     }
-
+    if (type === "video" && file.size > 50 * 1024 * 1024) {
+      toast({
+        title: "File size too large",
+        description: "Please upload a file that is less than 50MB in size",
+        variant: "destructive",
+      });
+      return false;
+    }
     return true;
   };
 
@@ -129,11 +118,7 @@ const ImageUpload = ({
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const selectedFile = event.target.files?.[0];
-
-    if (!selectedFile) {
-      return;
-    }
-
+    if (!selectedFile) return;
     if (!onValidate(selectedFile)) {
       event.target.value = "";
       return;
@@ -171,23 +156,21 @@ const ImageUpload = ({
   };
 
   return (
-    <ImageKitProvider urlEndpoint={urlEndpoint}>
+    <div>
       <input
         ref={inputRef}
         type="file"
         accept={accept}
         onChange={handleFileChange}
-        className="hidden"
+        className="sr-only"
+        tabIndex={-1}
       />
 
       <button
         type="button"
         className={cn("upload-btn", styles.button)}
-        onClick={(e) => {
-          e.preventDefault();
-          inputRef.current?.click();
-        }}
         disabled={isUploading}
+        onClick={() => inputRef.current?.click()}
       >
         <NextImage
           src="/icons/upload.svg"
@@ -196,9 +179,7 @@ const ImageUpload = ({
           height={20}
           className="object-contain"
         />
-
         <p className={cn("text-base", styles.placeholder)}>{placeholder}</p>
-
         {file.filePath && (
           <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
         )}
@@ -212,22 +193,24 @@ const ImageUpload = ({
         </div>
       )}
 
-      {file.filePath &&
-        (type === "image" ? (
-          <IKImage
-            alt={file.filePath}
-            src={file.filePath}
-            width={500}
-            height={300}
-          />
-        ) : type === "video" ? (
-          <IKVideo
-            src={file.filePath}
-            controls={true}
-            className="h-96 w-full rounded-xl"
-          />
-        ) : null)}
-    </ImageKitProvider>
+      <ImageKitProvider urlEndpoint={urlEndpoint}>
+        {file.filePath &&
+          (type === "image" ? (
+            <IKImage
+              alt={file.filePath}
+              src={file.filePath}
+              width={500}
+              height={300}
+            />
+          ) : type === "video" ? (
+            <IKVideo
+              src={file.filePath}
+              controls={true}
+              className="h-96 w-full rounded-xl"
+            />
+          ) : null)}
+      </ImageKitProvider>
+    </div>
   );
 };
 

@@ -95,18 +95,17 @@ const AuthForm = <T extends FieldValues>({
                   <FormLabel className="capitalize">
                     {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
                   </FormLabel>
-                  <FormControl>
-                    {field.name === "universityCard" ? (
-                      <ImageUpload
-                        type="image"
-                        accept="image/*"
-                        placeholder="Upload your ID"
-                        folder="ids"
-                        variant="dark"
-                        onFileChange={field.onChange}
-                        value={field.value}
-                      />
-                    ) : (
+                  {field.name === "universityCard" ? (
+                    <ImageUpload
+                      type="image"
+                      accept="image/*"
+                      placeholder="Upload your ID"
+                      folder="ids"
+                      variant="dark"
+                      onFileChange={field.onChange}
+                    />
+                  ) : (
+                    <FormControl>
                       <Input
                         required
                         type={
@@ -115,8 +114,8 @@ const AuthForm = <T extends FieldValues>({
                         {...field}
                         className="form-input"
                       />
-                    )}
-                  </FormControl>
+                    </FormControl>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
