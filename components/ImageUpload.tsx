@@ -8,7 +8,7 @@ import {
   Video as IKVideo,
 } from "@imagekit/next";
 import config from "@/lib/config";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import NextImage from "next/image";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -25,20 +25,17 @@ const authenticator = async () => {
 
     if (!response.ok) {
       const errorText = await response.text();
-
       throw new Error(
         `Request failed with status ${response.status}: ${errorText}`,
       );
     }
 
     const data = await response.json();
-
     const { signature, expire, token } = data;
-
     return { token, expire, signature };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    throw new Error(`Authentication request failed: ${error.message}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Authentication request failed: ${message}`);
   }
 };
 
@@ -61,6 +58,7 @@ const ImageUpload = ({
   onFileChange,
   value,
 }: Props) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<{ filePath: string | null }>({
     filePath: value ?? null,
   });
@@ -78,7 +76,6 @@ const ImageUpload = ({
 
   const onError = (error: unknown) => {
     console.log(error);
-
     toast({
       title: `${type} upload failed`,
       description: `Your ${type} could not be uploaded. Please try again.`,
@@ -88,39 +85,32 @@ const ImageUpload = ({
 
   const onSuccess = (res: UploadResponse) => {
     const nextFilePath = res.filePath ?? null;
-    const uploadLabel = type === "video" ? "Video" : "Image";
-
     setFile({ filePath: nextFilePath });
     onFileChange(nextFilePath ?? "");
 
     toast({
-      title: `${uploadLabel} uploaded successfully`,
+      title: `${type} uploaded successfully`,
       description: `${nextFilePath ?? "File"} uploaded successfully!`,
     });
   };
 
   const onValidate = (file: File) => {
-    if (type === "image") {
-      if (file.size > 20 * 1024 * 1024) {
-        toast({
-          title: "File size too large",
-          description: "Please upload a file that is less than 20MB in size",
-          variant: "destructive",
-        });
-
-        return false;
-      }
-    } else if (type === "video") {
-      if (file.size > 50 * 1024 * 1024) {
-        toast({
-          title: "File size too large",
-          description: "Please upload a file that is less than 50MB in size",
-          variant: "destructive",
-        });
-        return false;
-      }
+    if (type === "image" && file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File size too large",
+        description: "Please upload a file that is less than 20MB in size",
+        variant: "destructive",
+      });
+      return false;
     }
-
+    if (type === "video" && file.size > 50 * 1024 * 1024) {
+      toast({
+        title: "File size too large",
+        description: "Please upload a file that is less than 50MB in size",
+        variant: "destructive",
+      });
+      return false;
+    }
     return true;
   };
 
@@ -128,11 +118,7 @@ const ImageUpload = ({
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const selectedFile = event.target.files?.[0];
-
-    if (!selectedFile) {
-      return;
-    }
-
+    if (!selectedFile) return;
     if (!onValidate(selectedFile)) {
       event.target.value = "";
       return;
@@ -171,21 +157,21 @@ const ImageUpload = ({
 
   return (
     <div>
-      <label
-        className={cn(
-          "upload-btn cursor-pointer",
-          styles.button,
-          isUploading && "pointer-events-none opacity-50",
-        )}
-      >
-        <input
-          type="file"
-          accept={accept}
-          onChange={handleFileChange}
-          className="sr-only"
-          disabled={isUploading}
-        />
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleFileChange}
+        className="hidden"
+        tabIndex={-1}
+      />
 
+      <button
+        type="button"
+        className={cn("upload-btn", styles.button)}
+        disabled={isUploading}
+        onClick={() => inputRef.current?.click()}
+      >
         <NextImage
           src="/icons/upload.svg"
           alt="upload-icon"
@@ -193,13 +179,11 @@ const ImageUpload = ({
           height={20}
           className="object-contain"
         />
-
         <p className={cn("text-base", styles.placeholder)}>{placeholder}</p>
-
         {file.filePath && (
           <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
         )}
-      </label>
+      </button>
 
       {progress > 0 && progress !== 100 && (
         <div className="w-full rounded-full bg-green-200">
