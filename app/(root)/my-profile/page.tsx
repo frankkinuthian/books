@@ -13,11 +13,11 @@ const Page = () => {
           "use server";
 
           // Sign-out logic is executed on the server when the form submits
-          await signOut();
+          await signOut({ redirectTo: "/sign-in" });
         }}
         className="mb-10"
       >
-        <Button>Logout</Button>
+        <Button type="submit">Logout</Button>
       </form>
 
       <BookList title="Borrowed Books" books={sampleBooks} />
