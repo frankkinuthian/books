@@ -92,30 +92,37 @@ const AuthForm = <T extends FieldValues>({
               name={field as Path<T>}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="capitalize">
-                    {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
-                  </FormLabel>
                   {field.name === "universityCard" ? (
-                    <ImageUpload
-                      type="image"
-                      accept="image/*"
-                      placeholder="Upload your ID"
-                      folder="ids"
-                      variant="dark"
-                      onFileChange={field.onChange}
-                      value={field.value}
-                    />
-                  ) : (
-                    <FormControl>
-                      <Input
-                        required
-                        type={
-                          FIELD_TYPES[field.name as keyof typeof FIELD_TYPES]
-                        }
-                        {...field}
-                        className="form-input"
+                    <>
+                      <p className="text-sm font-medium capitalize text-light-100">
+                        {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
+                      </p>
+                      <ImageUpload
+                        type="image"
+                        accept="image/*"
+                        placeholder="Upload your ID"
+                        folder="ids"
+                        variant="dark"
+                        onFileChange={field.onChange}
+                        value={field.value}
                       />
-                    </FormControl>
+                    </>
+                  ) : (
+                    <>
+                      <FormLabel className="capitalize">
+                        {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          required
+                          type={
+                            FIELD_TYPES[field.name as keyof typeof FIELD_TYPES]
+                          }
+                          {...field}
+                          className="form-input"
+                        />
+                      </FormControl>
+                    </>
                   )}
                   <FormMessage />
                 </FormItem>
