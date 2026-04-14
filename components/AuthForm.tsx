@@ -104,6 +104,7 @@ const AuthForm = <T extends FieldValues>({
                         folder="ids"
                         variant="dark"
                         onFileChange={field.onChange}
+                        value={field.value}
                       />
                     ) : (
                       <Input
