@@ -8,7 +8,7 @@ import {
   Video as IKVideo,
 } from "@imagekit/next";
 import config from "@/lib/config";
-import { useId, useState } from "react";
+import { useState } from "react";
 import NextImage from "next/image";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,6 @@ const ImageUpload = ({
   onFileChange,
   value,
 }: Props) => {
-  const fileInputId = useId();
   const [file, setFile] = useState<{ filePath: string | null }>({
     filePath: value ?? null,
   });
@@ -171,24 +170,22 @@ const ImageUpload = ({
   };
 
   return (
-    <ImageKitProvider urlEndpoint={urlEndpoint}>
-      <input
-        id={fileInputId}
-        type="file"
-        accept={accept}
-        onChange={handleFileChange}
-        className="sr-only"
-        disabled={isUploading}
-      />
-
+    <div>
       <label
-        htmlFor={fileInputId}
         className={cn(
           "upload-btn cursor-pointer",
           styles.button,
           isUploading && "pointer-events-none opacity-50",
         )}
       >
+        <input
+          type="file"
+          accept={accept}
+          onChange={handleFileChange}
+          className="sr-only"
+          disabled={isUploading}
+        />
+
         <NextImage
           src="/icons/upload.svg"
           alt="upload-icon"
@@ -212,22 +209,24 @@ const ImageUpload = ({
         </div>
       )}
 
-      {file.filePath &&
-        (type === "image" ? (
-          <IKImage
-            alt={file.filePath}
-            src={file.filePath}
-            width={500}
-            height={300}
-          />
-        ) : type === "video" ? (
-          <IKVideo
-            src={file.filePath}
-            controls={true}
-            className="h-96 w-full rounded-xl"
-          />
-        ) : null)}
-    </ImageKitProvider>
+      <ImageKitProvider urlEndpoint={urlEndpoint}>
+        {file.filePath &&
+          (type === "image" ? (
+            <IKImage
+              alt={file.filePath}
+              src={file.filePath}
+              width={500}
+              height={300}
+            />
+          ) : type === "video" ? (
+            <IKVideo
+              src={file.filePath}
+              controls={true}
+              className="h-96 w-full rounded-xl"
+            />
+          ) : null)}
+      </ImageKitProvider>
+    </div>
   );
 };
 
