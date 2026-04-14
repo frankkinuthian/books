@@ -8,7 +8,7 @@ import {
   Video as IKVideo,
 } from "@imagekit/next";
 import config from "@/lib/config";
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import NextImage from "next/image";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ const authenticator = async () => {
     const { signature, expire, token } = data;
 
     return { token, expire, signature };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     throw new Error(`Authentication request failed: ${error.message}`);
   }
@@ -61,7 +61,7 @@ const ImageUpload = ({
   onFileChange,
   value,
 }: Props) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputId = useId();
   const [file, setFile] = useState<{ filePath: string | null }>({
     filePath: value ?? null,
   });
@@ -173,21 +173,21 @@ const ImageUpload = ({
   return (
     <ImageKitProvider urlEndpoint={urlEndpoint}>
       <input
-        ref={inputRef}
+        id={fileInputId}
         type="file"
         accept={accept}
         onChange={handleFileChange}
-        className="hidden"
+        className="sr-only"
+        disabled={isUploading}
       />
 
-      <button
-        type="button"
-        className={cn("upload-btn", styles.button)}
-        onClick={(e) => {
-          e.preventDefault();
-          inputRef.current?.click();
-        }}
-        disabled={isUploading}
+      <label
+        htmlFor={fileInputId}
+        className={cn(
+          "upload-btn cursor-pointer",
+          styles.button,
+          isUploading && "pointer-events-none opacity-50",
+        )}
       >
         <NextImage
           src="/icons/upload.svg"
@@ -202,7 +202,7 @@ const ImageUpload = ({
         {file.filePath && (
           <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
         )}
-      </button>
+      </label>
 
       {progress > 0 && progress !== 100 && (
         <div className="w-full rounded-full bg-green-200">
