@@ -20,6 +20,7 @@ export const sendEmail = async ({
   subject: string;
   message: string;
 }) => {
+  // QStash client
   await qstashClient.publishJSON({
     api: {
       name: "email",
